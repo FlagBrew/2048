@@ -10,7 +10,7 @@ Your current gamestate will be saved when you quit the game using **+** and will
 
 # Screenshot
 
-![](screen.png)
+![](https://i.imgur.com/hbFCs2w.png)
 
 # License
 
