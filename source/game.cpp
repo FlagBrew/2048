@@ -104,24 +104,24 @@ void Game::scanInput(u64 kDown)
     else {
         std::array<Cell, 16> gridclone = grid;
 
-        if (kDown & HidNpadButton_Up) {
+        if (kDown & HidNpadButton_AnyUp) {
             Grid::transpose();
             Grid::flip();
             Grid::operate();
             Grid::flip();
             Grid::transpose();
         }
-        else if (kDown & HidNpadButton_Down) {
+        else if (kDown & HidNpadButton_AnyDown) {
             Grid::transpose();
             Grid::operate();
             Grid::transpose();
         }
-        else if (kDown & HidNpadButton_Left) {
+        else if (kDown & HidNpadButton_AnyLeft) {
             Grid::flip();
             Grid::operate();
             Grid::flip();
         }
-        else if (kDown & HidNpadButton_Right) {
+        else if (kDown & HidNpadButton_AnyRight) {
             Grid::operate();
         }
 
@@ -198,10 +198,15 @@ void Game::show(Framebuffer* fb)
         }
     }
 
+    u32 restart_w;
+    GetTextDimensions(font24, "Press B to restart.", &restart_w, NULL);
+    DrawText(font24, ceil((1280 - restart_w) / 2), 630, MakeColor(119, 110, 101, 255), "Press B to restart.");
+
     if (gameOver()) {
-        u32 lost_w;
-        GetTextDimensions(font24, "Press B to restart.", &lost_w, NULL);
-        DrawText(font24, ceil((1280 - lost_w) / 2), 640, MakeColor(119, 110, 101, 255), "Press B to restart.");
+        u32 restart_w;
+        GetTextDimensions(font24, "Game over :(", &restart_w, NULL);
+        DrawText(font24, ceil((1280 - restart_w) / 2), 664, MakeColor(119, 110, 101, 255), "Game over :(");
+        framebufferEnd(fb);
 
         PadState pad;
         while (appletMainLoop()) {
@@ -209,9 +214,9 @@ void Game::show(Framebuffer* fb)
             u64 kDown = padGetButtonsDown(&pad);
             if (kDown & HidNpadButton_B)
                 break;
-            framebufferEnd(fb);
         }
         Game::init();
+        return;
     }
 
     framebufferEnd(fb);
