@@ -14,9 +14,15 @@ bool fileExists(std::string path)
 
 int main()
 {
+    PadState pad;
     mkdir("sdmc:/switch", 777);
     mkdir("sdmc:/switch/2048", 777);
-    gfxInitDefault();
+    padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+    padInitializeDefault(&pad);
+
+    Framebuffer fb;
+    framebufferCreate(&fb, nwindowGetDefault(), FB_WIDTH, FB_HEIGHT, PIXEL_FORMAT_RGBA_8888, 2);
+    framebufferMakeLinear(&fb);
 
     Game::init();
     if (fileExists("sdmc:/switch/2048/state"))
@@ -24,13 +30,17 @@ int main()
         Game::loadState();
     }
 
-    while(appletMainLoop() && !(hidKeysDown(CONTROLLER_P1_AUTO) & KEY_PLUS))
+    while(appletMainLoop())
     {
-        Game::scanInput();
-        Game::show();
+        padUpdate(&pad);
+        u64 kDown = padGetButtonsDown(&pad);
+        if (kDown & HidNpadButton_Plus) break;
+
+        Game::scanInput(kDown);
+        Game::show(&fb);
     }
 
     Game::saveState();
-    gfxExit();
+    framebufferClose(&fb);
 	return 0;
 }

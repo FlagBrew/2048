@@ -8,6 +8,10 @@
 #include <ctime>
 #include <vector>
 #include "cell.hpp"
+#include <switch.h>
+
+#define FB_WIDTH 1280
+#define FB_HEIGHT 720
 
 namespace Grid
 {
@@ -22,12 +26,12 @@ namespace Grid
 namespace Game 
 {
     void init(void);
-    void scanInput(void);
+    void scanInput(u64);
     bool gameWon(void);
     bool gameOver(void);
     void saveState(void);
     void loadState(void);
-    void show(void);
+    void show(Framebuffer* fb);
 }
 
 #endif

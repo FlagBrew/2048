@@ -105,11 +105,9 @@ void Grid::flip(void)
     }
 }
 
-void Game::scanInput(void)
+void Game::scanInput(u64 kDown)
 {
-    hidScanInput();
-    u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
-    if (kDown & KEY_B)
+    if (kDown & HidNpadButton_B)
     {
         // restore game
         init();
@@ -118,7 +116,7 @@ void Game::scanInput(void)
     {
         std::array<Cell, 16> gridclone = grid;
 
-        if (kDown & KEY_UP)
+        if (kDown & HidNpadButton_Up)
         {
             Grid::transpose();
             Grid::flip();
@@ -126,19 +124,19 @@ void Game::scanInput(void)
             Grid::flip();
             Grid::transpose();
         }
-        else if (kDown & KEY_DOWN)
+        else if (kDown & HidNpadButton_Down)
         {
             Grid::transpose();
             Grid::operate();
             Grid::transpose();
         }
-        else if (kDown & KEY_LEFT)
+        else if (kDown & HidNpadButton_Left)
         {
             Grid::flip();
             Grid::operate();
             Grid::flip();
         }
-        else if (kDown & KEY_RIGHT)
+        else if (kDown & HidNpadButton_Right)
         {
             Grid::operate();
         }
@@ -189,11 +187,14 @@ bool Game::gameWon(void)
     return false;
 }
 
-void Game::show(void)
+void Game::show(Framebuffer* fb)
 {
+    u32 stride;
+    g_framebuf = (u8*)framebufferBegin(fb, &stride);
+    g_framebufWidth = stride / sizeof(u32);
+
     // background
-    g_framebuf = gfxGetFramebuffer(&g_framebufWidth, NULL);
-    memset(g_framebuf, 250, gfxGetFramebufferSize());
+    memset(g_framebuf, 250, stride*FB_HEIGHT);
 
     // the matrix background
     rectangle(
@@ -240,19 +241,19 @@ void Game::show(void)
         u32 lost_w;
         GetTextDimensions(font24, "Press B to restart.", &lost_w, NULL);
         DrawText(font24, ceil((1280 - lost_w)/2), 640, MakeColor(119, 110, 101, 255), "Press B to restart.");
-        while (appletMainLoop() &&!(hidKeysDown(CONTROLLER_P1_AUTO) & KEY_B))
+
+        PadState pad;
+        while (appletMainLoop())
         {
-            hidScanInput();
-            gfxFlushBuffers();
-            gfxSwapBuffers();
-            gfxWaitForVsync();
+            padUpdate(&pad);
+            u64 kDown = padGetButtonsDown(&pad);
+            if (kDown & HidNpadButton_B) break;
+            framebufferEnd(fb);
         }
         Game::init();
     }
 
-    gfxFlushBuffers();
-    gfxSwapBuffers();
-    gfxWaitForVsync();
+    framebufferEnd(fb);
 }
 
 void Game::saveState(void)
