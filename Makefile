@@ -30,7 +30,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #     - <libnx folder>/default_icon.jpg
 #---------------------------------------------------------------------------------
 VERSION_MAJOR := 1
-VERSION_MINOR := 0
+VERSION_MINOR := 1
 VERSION_MICRO := 0
 
 APP_TITLE	:=	2048
@@ -156,10 +156,13 @@ clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(OUTDIR)
 
+#---------------------------------------------------------------------------------
+format:
+	clang-format -i -style=file $(foreach dir,$(SOURCES),$(wildcard $(dir)/*.c) $(wildcard $(dir)/*.cpp) $(wildcard $(dir)/*.tcc)) $(foreach dir,$(INCLUDES),$(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hpp))
 
 #---------------------------------------------------------------------------------
 else
-.PHONY:	all
+.PHONY:	all clean format
 
 DEPENDS	:=	$(OFILES:.o=.d)
 

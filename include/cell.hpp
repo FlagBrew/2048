@@ -1,22 +1,21 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
+#include "draw.hpp"
+#include <string>
 #include <switch.h>
 #include <unordered_map>
-#include <string>
-#include "draw.hpp"
 
 extern const u32 g_l;
 extern const u32 g_spacing;
 extern const u32 g_xstart;
 extern const u32 g_ystart;
 
-class Cell
-{
+class Cell {
 public:
-    Cell(void) : n{0} { };
-    Cell(u32 n) : n{n} { };
-    ~Cell(void) { };
+    Cell(void) : n{0} {};
+    Cell(u32 n) : n{n} {};
+    ~Cell(void){};
 
     void value(u32 m);
     u32 value(void);

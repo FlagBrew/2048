@@ -1,10 +1,12 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
+#include <switch.h>
+
 typedef union {
     u32 abgr;
     struct {
-        u8 r,g,b,a;
+        u8 r, g, b, a;
     };
 } color_t;
 

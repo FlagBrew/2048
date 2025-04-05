@@ -1,15 +1,15 @@
-#include <switch.h>
-#include <sys/stat.h>
 #include "draw.hpp"
 #include "game.hpp"
+#include <switch.h>
+#include <sys/stat.h>
 
 u8* g_framebuf;
 u32 g_framebufWidth;
 
 bool fileExists(std::string path)
 {
-    struct stat buffer;   
-    return (stat (path.c_str(), &buffer) == 0);
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0);
 }
 
 int main()
@@ -25,16 +25,15 @@ int main()
     framebufferMakeLinear(&fb);
 
     Game::init();
-    if (fileExists("sdmc:/switch/2048/state"))
-    {
+    if (fileExists("sdmc:/switch/2048/state")) {
         Game::loadState();
     }
 
-    while(appletMainLoop())
-    {
+    while (appletMainLoop()) {
         padUpdate(&pad);
         u64 kDown = padGetButtonsDown(&pad);
-        if (kDown & HidNpadButton_Plus) break;
+        if (kDown & HidNpadButton_Plus)
+            break;
 
         Game::scanInput(kDown);
         Game::show(&fb);
@@ -42,5 +41,5 @@ int main()
 
     Game::saveState();
     framebufferClose(&fb);
-	return 0;
+    return 0;
 }

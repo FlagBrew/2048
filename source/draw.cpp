@@ -2,10 +2,8 @@
 
 void rectangle(u32 x, u32 y, u16 w, u16 h, color_t color)
 {
-    for (u32 j = y; j < y+h; j++)
-    {
-        for (u32 i = x; i < x+w; i+=4)
-        {
+    for (u32 j = y; j < y + h; j++) {
+        for (u32 i = x; i < x + w; i += 4) {
             Draw4PixelsRaw(i, j, color);
         }
     }
@@ -15,7 +13,7 @@ static inline const ffnt_page_t* FontGetPage(const ffnt_header_t* font, u32 page
 {
     if (page_id >= font->npages)
         return NULL;
-    ffnt_pageentry_t* ent = &((ffnt_pageentry_t*)(font+1))[page_id];
+    ffnt_pageentry_t* ent = &((ffnt_pageentry_t*)(font + 1))[page_id];
     if (ent->size == 0)
         return NULL;
     return (const ffnt_page_t*)((const u8*)font + ent->offset);
@@ -47,20 +45,19 @@ static void DrawGlyph(u32 x, u32 y, color_t clr, const glyph_t* glyph)
     const u8* data = glyph->data;
     x += glyph->posX;
     y += glyph->posY;
-    for (j = 0; j < glyph->height; j ++)
-    {
-        for (i = 0; i < glyph->width; i ++)
-        {
+    for (j = 0; j < glyph->height; j++) {
+        for (i = 0; i < glyph->width; i++) {
             clr.a = *data++;
-            if (!clr.a) continue;
-            DrawPixel(x+i, y+j, clr);
+            if (!clr.a)
+                continue;
+            DrawPixel(x + i, y + j, clr);
         }
     }
 }
 
 static inline u8 DecodeByte(const char** ptr)
 {
-    u8 c = (u8)**ptr;
+    u8 c = (u8) * *ptr;
     *ptr += 1;
     return c;
 }
@@ -82,39 +79,32 @@ static inline u32 DecodeUTF8(const char** ptr)
     c = DecodeByte(ptr);
     if ((c & 0x80) == 0)
         return c;
-    if ((c & 0xE0) == 0xC0)
-    {
+    if ((c & 0xE0) == 0xC0) {
         c1 = DecodeUTF8Cont(ptr);
-        if (c1 >= 0)
-        {
+        if (c1 >= 0) {
             r = ((c & 0x1F) << 6) | c1;
             if (r >= 0x80)
                 return r;
         }
-    } else if ((c & 0xF0) == 0xE0)
-    {
+    }
+    else if ((c & 0xF0) == 0xE0) {
         c1 = DecodeUTF8Cont(ptr);
-        if (c1 >= 0)
-        {
+        if (c1 >= 0) {
             c2 = DecodeUTF8Cont(ptr);
-            if (c2 >= 0)
-            {
+            if (c2 >= 0) {
                 r = ((c & 0x0F) << 12) | (c1 << 6) | c2;
                 if (r >= 0x800 && (r < 0xD800 || r >= 0xE000))
                     return r;
             }
         }
-    } else if ((c & 0xF8) == 0xF0)
-    {
+    }
+    else if ((c & 0xF8) == 0xF0) {
         c1 = DecodeUTF8Cont(ptr);
-        if (c1 >= 0)
-        {
+        if (c1 >= 0) {
             c2 = DecodeUTF8Cont(ptr);
-            if (c2 >= 0)
-            {
+            if (c2 >= 0) {
                 c3 = DecodeUTF8Cont(ptr);
-                if (c3 >= 0)
-                {
+                if (c3 >= 0) {
                     r = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
                     if (r >= 0x10000 && r < 0x110000)
                         return r;
@@ -129,20 +119,18 @@ static void DrawText_(const ffnt_header_t* font, u32 x, u32 y, color_t clr, cons
 {
     y += font->baseline;
     u32 origX = x;
-    while (*text)
-    {
-        if (max_width && x-origX >= max_width) {
-            text = end_text;
+    while (*text) {
+        if (max_width && x - origX >= max_width) {
+            text      = end_text;
             max_width = 0;
         }
 
         glyph_t glyph;
         u32 codepoint = DecodeUTF8(&text);
 
-        if (codepoint == '\n')
-        {
+        if (codepoint == '\n') {
             if (max_width) {
-                text = end_text;
+                text      = end_text;
                 max_width = 0;
                 continue;
             }
@@ -152,8 +140,7 @@ static void DrawText_(const ffnt_header_t* font, u32 x, u32 y, color_t clr, cons
             continue;
         }
 
-        if (!FontLoadGlyph(&glyph, font, codepoint))
-        {
+        if (!FontLoadGlyph(&glyph, font, codepoint)) {
             if (!FontLoadGlyph(&glyph, font, '?'))
                 continue;
         }
@@ -170,22 +157,19 @@ void DrawText(const ffnt_header_t* font, u32 x, u32 y, color_t clr, const char* 
 
 void GetTextDimensions(const ffnt_header_t* font, const char* text, u32* width_out, u32* height_out)
 {
-    u32 x = 0;
+    u32 x     = 0;
     u32 width = 0, height = 0;
-    while (*text)
-    {
+    while (*text) {
         glyph_t glyph;
         u32 codepoint = DecodeUTF8(&text);
 
-        if (codepoint == '\n')
-        {
+        if (codepoint == '\n') {
             x = 0;
             height += font->height;
             continue;
         }
 
-        if (!FontLoadGlyph(&glyph, font, codepoint))
-        {
+        if (!FontLoadGlyph(&glyph, font, codepoint)) {
             if (!FontLoadGlyph(&glyph, font, '?'))
                 continue;
         }
